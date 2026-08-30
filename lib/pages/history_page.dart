@@ -541,6 +541,23 @@ class _SessionRow extends StatelessWidget {
               ],
             ),
           ),
+          if (session.earlyComplete)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: p.gold.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                context.t('history.earlyTag'),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: p.gold,
+                ),
+              ),
+            ),
           Text(
             Format.yuan(session.reward),
             style: TextStyle(

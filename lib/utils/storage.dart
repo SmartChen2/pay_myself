@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
-/// 简单的 JSON 文件持久化,零外部依赖。
+/// 简单的 JSON 文件持久化,零外部依赖(移动端使用 path_provider)。
 /// 文件位置:
+///   - Android/iOS: 应用私有数据目录(getApplicationSupportDirectory)
 ///   - Windows: %APPDATA%/paymyself_state.json
 ///   - macOS:   ~/Library/Application Support/paymyself_state.json
 ///   - Linux:   ~/.local/share/paymyself_state.json
@@ -10,26 +12,54 @@ import 'dart:convert';
 class Storage {
   static const _filename = 'paymyself_state.json';
 
-  static Future<File> _file() async {
+  /// 决定持久化根目录:移动端走应用私有目录(稳定且可写),桌面端沿用原有路径。
+  static Future<String> _baseDir() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // 应用私有的"支持文件"目录,卸载前一直有效,跨启动稳定。
+      return (await getApplicationSupportDirectory()).path;
+    }
     final env = Platform.environment;
-    String dir;
     if (Platform.isWindows) {
-      dir = env['APPDATA'] ?? env['LOCALAPPDATA'] ?? '.';
+      return env['APPDATA'] ?? env['LOCALAPPDATA'] ?? '.';
     } else if (Platform.isMacOS) {
-      dir = env['HOME'] != null
+      return env['HOME'] != null
           ? '${env['HOME']}/Library/Application Support'
           : '.';
     } else if (Platform.isLinux) {
-      dir = env['HOME'] != null ? '${env['HOME']}/.local/share' : '.';
+      return env['HOME'] != null ? '${env['HOME']}/.local/share' : '.';
     } else {
-      dir = '.';
+      return '.';
     }
-    final f = File('$dir/$_filename');
+  }
+
+  /// 确保持久化目录存在并返回其路径。
+  static Future<String> _ensureDir() async {
+    try {
+      final base = await _baseDir();
+      final d = Directory(base);
+      if (!await d.exists()) await d.create(recursive: true);
+      return base;
+    } catch (_) {
+      // 回退:应用文档目录(仅移动端有,桌面端继续用当前目录)
+      try {
+        final base = (await getApplicationDocumentsDirectory()).path;
+        final d = Directory(base);
+        if (!await d.exists()) await d.create(recursive: true);
+        return base;
+      } catch (_) {
+        return '.';
+      }
+    }
+  }
+
+  /// 返回状态文件(自动创建)。
+  static Future<File> _file() async {
+    final base = await _ensureDir();
+    final f = File('$base/$_filename');
     try {
       if (!await f.exists()) await f.create(recursive: true);
     } catch (_) {
-      // 回退到当前目录
-      return File(_filename);
+      // 创建失败也不影响后续读写尝试
     }
     return f;
   }
@@ -61,7 +91,7 @@ class Storage {
   /// 失败返回 null。复制后即便原文件被删,头像依然可用。
   static Future<String?> copyAvatar(File source) async {
     try {
-      final base = await _appDataDir();
+      final base = await _ensureDir();
       final srcPath = source.path;
       final dot = srcPath.lastIndexOf('.');
       final ext = dot >= 0 ? srcPath.substring(dot).toLowerCase() : '.jpg';
@@ -71,29 +101,5 @@ class Storage {
     } catch (_) {
       return null;
     }
-  }
-
-  /// 应用数据目录(与 state json 同目录),失败回退当前目录
-  static Future<String> _appDataDir() async {
-    final env = Platform.environment;
-    String dir;
-    if (Platform.isWindows) {
-      dir = env['APPDATA'] ?? env['LOCALAPPDATA'] ?? '.';
-    } else if (Platform.isMacOS) {
-      dir = env['HOME'] != null
-          ? '${env['HOME']}/Library/Application Support'
-          : '.';
-    } else if (Platform.isLinux) {
-      dir = env['HOME'] != null ? '${env['HOME']}/.local/share' : '.';
-    } else {
-      dir = '.';
-    }
-    try {
-      final d = Directory(dir);
-      if (!await d.exists()) await d.create(recursive: true);
-    } catch (_) {
-      return '.';
-    }
-    return dir;
   }
 }

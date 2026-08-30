@@ -141,10 +141,14 @@ class L10n {
 
     // === Focus page ===
     'focus.default.name': '专注',
-    'focus.paused': '已暂停 · {0}',
-    'focus.resume': '继续',
-    'focus.pause': '暂停',
     'focus.end': '结束专注',
+    'focus.early': '提前完成',
+    'focus.early.dialog.title': '提前完成',
+    'focus.early.dialog.msg': '将按完整收益 {0} 计入，确定提前完成吗？',
+    'focus.reward.added': '+{0} 到账',
+
+    // === 记录页 ===
+    'history.earlyTag': '提前完成',
 
     // === 时长选择 ===
     'duration.title': '选择专注时长',
@@ -332,10 +336,14 @@ class L10n {
 
     // === Focus page ===
     'focus.default.name': 'Focus',
-    'focus.paused': 'Paused · {0}',
-    'focus.resume': 'Resume',
-    'focus.pause': 'Pause',
     'focus.end': 'End Focus',
+    'focus.early': 'Early Finish',
+    'focus.early.dialog.title': 'Complete Early',
+    'focus.early.dialog.msg': 'Full reward {0} will be added. Complete early?',
+    'focus.reward.added': '+{0} earned',
+
+    // === History page ===
+    'history.earlyTag': 'Early',
 
     // === Duration sheet ===
     'duration.title': 'Choose focus duration',

@@ -7,6 +7,8 @@ class FocusSession {
   final int durationMinutes;
   final double reward;
   final DateTime completedAt;
+  /// 是否提前完成：无论实际专注时长，按完整计划时长计入全额收益。
+  final bool earlyComplete;
 
   const FocusSession({
     required this.id,
@@ -14,6 +16,7 @@ class FocusSession {
     required this.durationMinutes,
     required this.reward,
     required this.completedAt,
+    this.earlyComplete = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +25,7 @@ class FocusSession {
         'durationMinutes': durationMinutes,
         'reward': reward,
         'completedAt': completedAt.toIso8601String(),
+        'earlyComplete': earlyComplete,
       };
 
   factory FocusSession.fromJson(Map<String, dynamic> j) => FocusSession(
@@ -32,6 +36,7 @@ class FocusSession {
         completedAt: j['completedAt'] != null
             ? DateTime.tryParse(j['completedAt'] as String) ?? DateTime.now()
             : DateTime.now(),
+        earlyComplete: j['earlyComplete'] as bool? ?? false,
       );
 }
 

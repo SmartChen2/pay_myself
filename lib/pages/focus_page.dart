@@ -31,20 +31,16 @@ class _FocusPageState extends State<FocusPage>
   late final AnimationController _breathe;
   late final AnimationController _bump;
   Timer? _timer;
-  int _elapsed = 0; // 当前段落已专注秒数
-  int _elapsedBefore = 0; // 暂停前已记录的秒数
-  double _earnedBefore = 0; // 暂停前已记录的金额
-  bool _paused = false;
+  int _elapsed = 0; // 已专注秒数
 
   double get _totalReward =>
       _task?.rewardFor(widget.durationMinutes) ?? 0;
 
-  double get _segmentEarnings {
+  /// 按实际专注时长折算的收益(不超过全额)
+  double get _earnings {
     final t = (_elapsed / (widget.durationMinutes * 60)).clamp(0.0, 1.0);
     return _totalReward * t;
   }
-
-  double get _earnings => _earnedBefore + _segmentEarnings;
 
   Task? get _task => AppStateScope.of(context, listen: false).findTask(widget.taskId);
 
@@ -60,7 +56,7 @@ class _FocusPageState extends State<FocusPage>
       duration: const Duration(milliseconds: 200),
     );
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted || _paused) return;
+      if (!mounted) return;
       setState(() {
         _elapsed += 1;
         _bump.forward(from: 0);
@@ -81,41 +77,83 @@ class _FocusPageState extends State<FocusPage>
     super.dispose();
   }
 
-  /// 把当前段落的专注金额记入历史(暂停 / 结束时调用)
-  void _recordSegment() {
+  /// 把一条专注会话记入历史(结束专注 / 提前完成时调用)
+  void _recordSession({
+    required double reward,
+    required int minutes,
+    required bool earlyComplete,
+  }) {
     final state = AppStateScope.of(context, listen: false);
     final task = _task;
-    if (task == null || _elapsed == 0 || _segmentEarnings <= 0) return;
+    if (task == null || reward <= 0) return;
     state.completeSession(
       task: task,
-      durationMinutes: (_elapsed / 60).round().clamp(1, 9999),
-      reward: _segmentEarnings,
+      durationMinutes: minutes,
+      reward: reward,
+      earlyComplete: earlyComplete,
       displayName: task.nameKey != null ? context.t(task.nameKey!) : task.name,
     );
-    _earnedBefore += _segmentEarnings;
-    _elapsedBefore += _elapsed;
-    _elapsed = 0;
   }
 
-  void _togglePause() {
-    setState(() {
-      if (!_paused) {
-        // 暂停:记录本次专注金额
-        _recordSegment();
-        _paused = true;
-      } else {
-        _paused = false;
-      }
-    });
-  }
-
+  /// 结束专注：按实际专注时长折算收益
   void _endFocus() {
-    // 结束专注:记录本次专注金额
-    _recordSegment();
+    _recordSession(
+      reward: _earnings,
+      minutes: (_elapsed / 60).round().clamp(1, 9999),
+      earlyComplete: false,
+    );
     final state = AppStateScope.of(context, listen: false);
     if (state.soundEnabled) {
       SoundFx.playMoney();
     }
+    Navigator.of(context).pop();
+  }
+
+  /// 提前完成：无需确认时长，直接按完整计划时长获得全额收益。
+  /// 需弹窗确认；确认后把到账金额以 Snackbar 展示给用户。
+  Future<void> _completeEarly() async {
+    final p = AppPalette.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: p.card,
+        title: Text(
+          context.t('focus.early.dialog.title'),
+          style: TextStyle(color: p.foreground),
+        ),
+        content: Text(
+          context.t('focus.early.dialog.msg', [Format.yuan(_totalReward)]),
+          style: TextStyle(color: p.mutedForeground),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(context.t('duration.cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(context.t('focus.early')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final reward = _totalReward;
+    _recordSession(
+      reward: reward,
+      minutes: widget.durationMinutes,
+      earlyComplete: true,
+    );
+    final state = AppStateScope.of(context, listen: false);
+    if (state.soundEnabled) {
+      SoundFx.playMoney();
+    }
+    // 让用户直接看到到账金额(页面即将 pop,Snackbar 挂在根 ScaffoldMessenger 上)
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.t('focus.reward.added', [Format.yuan(reward)])),
+      ),
+    );
     Navigator.of(context).pop();
   }
 
@@ -130,7 +168,7 @@ class _FocusPageState extends State<FocusPage>
     ));
     final task = _task;
     final totalSeconds = widget.durationMinutes * 60;
-    final remaining = (totalSeconds - _elapsedBefore - _elapsed).clamp(0, 1 << 31);
+    final remaining = (totalSeconds - _elapsed).clamp(0, 1 << 31);
     final reduced = MediaQuery.disableAnimationsOf(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -188,7 +226,7 @@ class _FocusPageState extends State<FocusPage>
                       builder: (context, child) {
                         final s = 1 + 0.06 * _breathe.value;
                         return Transform.scale(
-                          scale: _paused ? 1 : s,
+                          scale: s,
                           alignment: Alignment.center,
                           child: child,
                         );
@@ -196,7 +234,7 @@ class _FocusPageState extends State<FocusPage>
                       child: WalletIcon(
                         width: 170,
                         height: 142,
-                        glow: _paused ? 0.25 : 0.45 + 0.4 * _breathe.value,
+                        glow: 0.45 + 0.4 * _breathe.value,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -222,7 +260,7 @@ class _FocusPageState extends State<FocusPage>
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      _paused ? context.t('focus.paused', [Format.clock(remaining)]) : Format.clock(remaining),
+                      Format.clock(remaining),
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w300,
@@ -271,7 +309,7 @@ class _FocusPageState extends State<FocusPage>
                   ),
                 ),
               ),
-              // pause + end buttons
+              // end + early-finish buttons
               Positioned(
                 left: 0,
                 right: 0,
@@ -280,27 +318,6 @@ class _FocusPageState extends State<FocusPage>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextButton(
-                        onPressed: _togglePause,
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppTokens.darkInk2,
-                          backgroundColor: Colors.white.withOpacity(0.08),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 28,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppTokens.radiusPill),
-                            side: BorderSide(color: AppTokens.darkBorder),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        child: Text(_paused ? context.t('focus.resume') : context.t('focus.pause')),
-                      ),
-                      const SizedBox(width: 12),
                       TextButton(
                         onPressed: _endFocus,
                         style: TextButton.styleFrom(
@@ -320,6 +337,27 @@ class _FocusPageState extends State<FocusPage>
                           ),
                         ),
                         child: Text(context.t('focus.end')),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: _completeEarly,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppTokens.darkGold,
+                          backgroundColor: Colors.white.withOpacity(0.08),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 28,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppTokens.radiusPill),
+                            side: BorderSide(color: AppTokens.darkGold),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: Text(context.t('focus.early')),
                       ),
                     ],
                   ),

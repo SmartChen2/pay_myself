@@ -40,6 +40,8 @@ dependencies:
   audioplayers: ^6.8.1
   # 本地文件选择(头像上传),支持 Windows 桌面
   file_picker: ^12.1.2
+  # 移动端稳定的应用私有目录(持久化存储)
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

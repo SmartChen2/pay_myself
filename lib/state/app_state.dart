@@ -421,6 +421,7 @@ class AppState extends ChangeNotifier {
     required int durationMinutes,
     required double reward,
     String? displayName,
+    bool earlyComplete = false,
   }) {
     _history.insert(0, FocusSession(
       id: 'session-${++_seq}',
@@ -428,6 +429,7 @@ class AppState extends ChangeNotifier {
       durationMinutes: durationMinutes,
       reward: reward,
       completedAt: DateTime.now(),
+      earlyComplete: earlyComplete,
     ));
     notifyListeners();
     _persist();
