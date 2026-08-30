@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
-      flutter: stable
+      flutter: 3.47.2
       # groups 字段已删除，因为目前不需要
     scripts:
       - name: 设置 Flutter SDK 路径
