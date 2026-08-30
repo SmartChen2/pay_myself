@@ -1,15 +1,22 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import '../theme/app_palette.dart';
 
 /// 仿 iOS 状态栏（设计稿装饰用，真实设备上 SafeArea 已处理系统状态栏）。
-/// 仅在桌面端等无真实刘海时给页面顶部一点呼吸感；手机上返回空。
+/// 仅在桌面端等无系统状态栏的平台上渲染，给页面顶部一点装饰；
+/// 手机（Android/iOS）系统自带时间/电量状态栏，这里返回空，避免重复显示。
 class IosStatusBar extends StatelessWidget {
   final bool dark; // 深色墨水（用于浅色背景）
   const IosStatusBar({super.key, this.dark = true});
 
   @override
   Widget build(BuildContext context) {
+    // 手机系统自带状态栏，不要重复绘制；桌面端保留装饰栏。
+    if (Platform.isAndroid || Platform.isIOS) {
+      return const SizedBox.shrink();
+    }
     final p = AppPalette.of(context);
     final fg = p.foreground;
     final now = DateTime.now();
