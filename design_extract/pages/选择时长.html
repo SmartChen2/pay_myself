@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择时长</title>
+    <style id="theme-vars">
+/* PayMe 专注 — Design Tokens
+   Primary hue: warm gold (earnings / coin theme)
+   Focus screen: deep dark immersive background
+   Task list: clean light iOS surface
+*/
+
+:root {
+  /* === Brand Primary (Gold) === */
+  --brand-gold: #D4A017;
+  --brand-gold-light: #E8C25A;
+  --brand-gold-dark: #B8860B;
+  --brand-gold-soft: #F5E6C8;
+
+  /* === Light Mode — Task List === */
+  --brand-background: #F7F6F2;
+  --brand-foreground: #1A1A1F;
+  --brand-card: #FFFFFF;
+  --brand-card-foreground: #1A1A1F;
+  --brand-popover: #FFFFFF;
+  --brand-popover-foreground: #1A1A1F;
+  --brand-primary: #D4A017;
+  --brand-primary-foreground: #1A1A1F;
+  --brand-muted: #F0EDE5;
+  --brand-muted-foreground: #8A8A8E;
+  --brand-border: #E5E2DA;
+  --brand-input: #F0EDE5;
+  --brand-ring: #D4A017;
+
+  /* === Dark Mode — Focus Screen === */
+  --brand-dark-bg: #0B0B0F;
+  --brand-dark-surface: #14141A;
+  --brand-dark-surface-2: #1E1E26;
+  --brand-dark-ink: #FFFFFF;
+  --brand-dark-ink-2: rgba(255,255,255,0.65);
+  --brand-dark-ink-3: rgba(255,255,255,0.40);
+  --brand-dark-border: rgba(255,255,255,0.08);
+  --brand-dark-gold: #F0C75E;
+  --brand-dark-gold-soft: rgba(240,199,94,0.12);
+
+  /* === State Colors === */
+  --state-success: #34A853;
+  --state-warning: #F5A623;
+  --state-error: #EA4335;
+  --state-info: #4A90D9;
+
+  /* === Radius Scale === */
+  --brand-radius-sm: 8px;
+  --brand-radius-md: 12px;
+  --brand-radius-lg: 16px;
+  --brand-radius-xl: 16px;
+  --brand-radius-pill: 999px;
+
+  /* === Typography === */
+  --brand-font-sans: -apple-system, "SF Pro Display", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Helvetica Neue", system-ui, sans-serif;
+  --brand-font-mono: "SF Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+
+  /* === Spacing === */
+  --brand-space-1: 4px;
+  --brand-space-2: 8px;
+  --brand-space-3: 12px;
+  --brand-space-4: 16px;
+  --brand-space-5: 24px;
+  --brand-space-6: 32px;
+  --brand-space-7: 48px;
+
+  /* === Shadows === */
+  --brand-shadow-1: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03);
+  --brand-shadow-2: 0 8px 24px -8px rgba(15,23,42,0.05);
+  --brand-shadow-3: 0 24px 60px -20px rgba(15,23,42,0.05);
+  --brand-shadow-gold: 0 4px 20px -4px rgba(212,160,23,0.05);
+  --brand-shadow-modal: 0 8px 24px -8px rgba(15,23,42,0.12);
+  --brand-shadow-overlay: 0 24px 60px -20px rgba(15,23,42,0.25);
+  --brand-shadow-gold-glow: 0 4px 20px -4px rgba(212,160,23,0.30);
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--brand-background);
+    --color-foreground: var(--brand-foreground);
+    --color-card: var(--brand-card);
+    --color-card-foreground: var(--brand-card-foreground);
+    --color-popover: var(--brand-popover);
+    --color-popover-foreground: var(--brand-popover-foreground);
+    --color-primary: var(--brand-primary);
+    --color-primary-foreground: var(--brand-primary-foreground);
+    --color-muted: var(--brand-muted);
+    --color-muted-foreground: var(--brand-muted-foreground);
+    --color-border: var(--brand-border);
+    --color-input: var(--brand-input);
+    --color-ring: var(--brand-ring);
+    --radius-sm: var(--brand-radius-sm);
+    --radius-md: var(--brand-radius-md);
+    --radius-lg: var(--brand-radius-lg);
+    --radius-xl: var(--brand-radius-xl);
+  }
+  @layer base {
+    body { background: var(--brand-background); color: var(--brand-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--brand-background); }
+      .text-background { color: var(--brand-background); }
+      .border-background { border-color: var(--brand-background); }
+      .ring-background { --tw-ring-color: var(--brand-background); }
+      .bg-foreground { background-color: var(--brand-foreground); }
+      .text-foreground { color: var(--brand-foreground); }
+      .border-foreground { border-color: var(--brand-foreground); }
+      .ring-foreground { --tw-ring-color: var(--brand-foreground); }
+      .bg-card { background-color: var(--brand-card); }
+      .text-card { color: var(--brand-card); }
+      .border-card { border-color: var(--brand-card); }
+      .ring-card { --tw-ring-color: var(--brand-card); }
+      .bg-card-foreground { background-color: var(--brand-card-foreground); }
+      .text-card-foreground { color: var(--brand-card-foreground); }
+      .border-card-foreground { border-color: var(--brand-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--brand-card-foreground); }
+      .bg-popover { background-color: var(--brand-popover); }
+      .text-popover { color: var(--brand-popover); }
+      .border-popover { border-color: var(--brand-popover); }
+      .ring-popover { --tw-ring-color: var(--brand-popover); }
+      .bg-popover-foreground { background-color: var(--brand-popover-foreground); }
+      .text-popover-foreground { color: var(--brand-popover-foreground); }
+      .border-popover-foreground { border-color: var(--brand-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--brand-popover-foreground); }
+      .bg-primary { background-color: var(--brand-primary); }
+      .text-primary { color: var(--brand-primary); }
+      .border-primary { border-color: var(--brand-primary); }
+      .ring-primary { --tw-ring-color: var(--brand-primary); }
+      .bg-primary-foreground { background-color: var(--brand-primary-foreground); }
+      .text-primary-foreground { color: var(--brand-primary-foreground); }
+      .border-primary-foreground { border-color: var(--brand-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--brand-primary-foreground); }
+      .bg-muted { background-color: var(--brand-muted); }
+      .text-muted { color: var(--brand-muted); }
+      .border-muted { border-color: var(--brand-muted); }
+      .ring-muted { --tw-ring-color: var(--brand-muted); }
+      .bg-muted-foreground { background-color: var(--brand-muted-foreground); }
+      .text-muted-foreground { color: var(--brand-muted-foreground); }
+      .border-muted-foreground { border-color: var(--brand-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--brand-muted-foreground); }
+      .bg-border { background-color: var(--brand-border); }
+      .text-border { color: var(--brand-border); }
+      .border-border { border-color: var(--brand-border); }
+      .ring-border { --tw-ring-color: var(--brand-border); }
+      .bg-input { background-color: var(--brand-input); }
+      .text-input { color: var(--brand-input); }
+      .border-input { border-color: var(--brand-input); }
+      .ring-input { --tw-ring-color: var(--brand-input); }
+      .bg-ring { background-color: var(--brand-ring); }
+      .text-ring { color: var(--brand-ring); }
+      .border-ring { border-color: var(--brand-ring); }
+      .ring-ring { --tw-ring-color: var(--brand-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+      <!-- Coin icon sprite -->
+      <svg width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false">
+        <symbol id="icon-coin" viewBox="0 0 16 16">
+          <circle cx="8" cy="8" r="6.5" fill="#D4A017"/>
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="#B8860B" stroke-width="0.7"/>
+          <ellipse cx="6" cy="6" rx="2.6" ry="1.8" fill="#F5E6C8" opacity="0.85"/>
+        </symbol>
+      </svg>
+
+      <!-- Backdrop -->
+      <div class="fs-backdrop" aria-hidden="true"></div>
+
+      <!-- Bottom Sheet -->
+      <section class="fs-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <!-- Grab handle -->
+        <div class="fs-handle" aria-hidden="true"></div>
+
+        <!-- Sheet Header -->
+        <header class="fs-header">
+          <h1 id="sheet-title" class="fs-sheet-title">深度阅读</h1>
+          <p class="fs-sheet-subtitle">选择专注时长</p>
+        </header>
+
+        <!-- Duration Options -->
+        <section id="section-duration-options" class="fs-duration-grid">
+          <button type="button" class="fs-duration-card" data-duration="15" data-reward="1.50" aria-label="专注 15 分钟，预计收益 1.50 元">
+            <span class="fs-duration-time">15 分钟</span>
+            <span class="fs-duration-reward">
+              <svg class="fs-coin" width="16" height="16" aria-hidden="true" focusable="false"><use href="#icon-coin"/></svg>
+              <span>¥1.50</span>
+            </span>
+          </button>
+
+          <button type="button" class="fs-duration-card" data-duration="25" data-reward="3.00" data-selected="true" aria-label="专注 25 分钟，预计收益 3.00 元，推荐">
+            <span class="fs-badge">推荐</span>
+            <span class="fs-duration-time">25 分钟</span>
+            <span class="fs-duration-reward">
+              <svg class="fs-coin" width="16" height="16" aria-hidden="true" focusable="false"><use href="#icon-coin"/></svg>
+              <span>¥3.00</span>
+            </span>
+          </button>
+
+          <button type="button" class="fs-duration-card" data-duration="45" data-reward="6.00" aria-label="专注 45 分钟，预计收益 6.00 元">
+            <span class="fs-duration-time">45 分钟</span>
+            <span class="fs-duration-reward">
+              <svg class="fs-coin" width="16" height="16" aria-hidden="true" focusable="false"><use href="#icon-coin"/></svg>
+              <span>¥6.00</span>
+            </span>
+          </button>
+
+          <button type="button" class="fs-duration-card" data-duration="60" data-reward="8.00" aria-label="专注 60 分钟，预计收益 8.00 元">
+            <span class="fs-duration-time">60 分钟</span>
+            <span class="fs-duration-reward">
+              <svg class="fs-coin" width="16" height="16" aria-hidden="true" focusable="false"><use href="#icon-coin"/></svg>
+              <span>¥8.00</span>
+            </span>
+          </button>
+        </section>
+
+        <!-- Earnings Preview -->
+        <section id="section-earnings-preview" class="fs-earnings">
+          <span class="fs-earnings-label">本次预计收益</span>
+          <span class="fs-earnings-amount">
+            <svg class="fs-coin" width="18" height="18" aria-hidden="true" focusable="false"><use href="#icon-coin"/></svg>
+            <span data-earnings-amount>¥3.00</span>
+          </span>
+        </section>
+
+        <!-- Start Button -->
+        <button type="button" id="duration-start" data-dom-id="duration-start" class="fs-start">开始专注</button>
+
+        <!-- Cancel Link -->
+        <button type="button" class="fs-cancel">取消</button>
+      </section>
+    </main>
+    <script>
+      (function () {
+        var cards = Array.prototype.slice.call(document.querySelectorAll('.fs-duration-card'));
+        var amountEl = document.querySelector('[data-earnings-amount]');
+        if (!cards.length) return;
+        cards.forEach(function (card) {
+          card.addEventListener('click', function () {
+            cards.forEach(function (c) { c.removeAttribute('data-selected'); });
+            card.setAttribute('data-selected', 'true');
+            var reward = card.getAttribute('data-reward');
+            if (amountEl && reward) {
+              amountEl.textContent = '¥' + parseFloat(reward).toFixed(2);
+            }
+          });
+        });
+      })();
+    </script>
+    <script>lucide.createIcons();</script>
+
+    <style id="critical-layout">
+      /* === Focus Duration — Bottom Sheet Modal (responsive-safe static CSS) === */
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--brand-background);
+        color: var(--brand-foreground);
+        font-family: var(--brand-font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .fs-backdrop, .fs-sheet, .fs-handle, .fs-header, .fs-sheet-title, .fs-sheet-subtitle,
+      .fs-duration-grid, .fs-duration-card, .fs-duration-time, .fs-duration-reward, .fs-coin,
+      .fs-badge, .fs-earnings, .fs-earnings-label, .fs-earnings-amount, .fs-start, .fs-cancel {
+        box-sizing: border-box;
+      }
+
+      /* Backdrop */
+      .fs-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        z-index: 40;
+        animation: fs-fade-in 240ms ease-out both;
+      }
+
+      /* Bottom sheet */
+      .fs-sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        width: 100%;
+        max-width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        background: var(--brand-card);
+        border-radius: 24px 24px 0 0;
+        box-shadow: var(--brand-shadow-2);
+        padding: 24px 20px max(32px, env(safe-area-inset-bottom));
+        animation: fs-sheet-up 320ms cubic-bezier(.3,0,0,1) both;
+      }
+
+      @keyframes fs-sheet-up {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+      @keyframes fs-fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+
+      /* Grab handle */
+      .fs-handle {
+        width: 36px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--brand-border);
+        margin: 0 auto 20px;
+      }
+
+      /* Sheet header */
+      .fs-header { text-align: center; }
+      .fs-sheet-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--brand-foreground);
+        margin: 0;
+        line-height: 1.3;
+        letter-spacing: 0.01em;
+      }
+      .fs-sheet-subtitle {
+        font-size: 13px;
+        color: var(--brand-muted-foreground);
+        margin: 6px 0 0;
+        line-height: 1.4;
+      }
+
+      /* Duration grid */
+      .fs-duration-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .fs-duration-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 96px;
+        padding: 20px 16px;
+        background: var(--brand-card);
+        border: 2px solid var(--brand-border);
+        border-radius: var(--brand-radius-lg);
+        font-family: inherit;
+        color: var(--brand-foreground);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+      .fs-duration-card[data-selected="true"] {
+        border-color: var(--brand-gold);
+        background: var(--brand-gold-soft);
+        box-shadow: var(--brand-shadow-gold);
+      }
+      .fs-duration-card:active { transform: scale(0.98); }
+
+      .fs-duration-time {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--brand-foreground);
+        line-height: 1.2;
+      }
+
+      .fs-duration-reward {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        color: var(--brand-gold);
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+      }
+
+      .fs-coin { display: block; flex: none; }
+
+      /* Recommended badge */
+      .fs-badge {
+        position: absolute;
+        top: -9px;
+        right: 12px;
+        background: var(--brand-gold);
+        color: var(--brand-foreground);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        line-height: 1.4;
+        padding: 2px 8px;
+        border-radius: 999px;
+        box-shadow: 0 2px 6px rgba(212,160,23,0.30);
+      }
+
+      /* Earnings preview */
+      .fs-earnings {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding: 16px 4px 4px;
+        border-top: 1px solid var(--brand-border);
+      }
+      .fs-earnings-label {
+        font-size: 15px;
+        color: var(--brand-muted-foreground);
+      }
+      .fs-earnings-amount {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--brand-gold);
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+      }
+
+      /* Start button */
+      .fs-start {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        margin-top: 24px;
+        padding: 0 16px;
+        border: none;
+        border-radius: var(--brand-radius-md);
+        background: var(--brand-gold);
+        color: var(--brand-foreground);
+        font-family: inherit;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        box-shadow: var(--brand-shadow-gold);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: background-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+      }
+      .fs-start:hover { background: var(--brand-gold-light); }
+      .fs-start:active { transform: scale(0.98); }
+
+      /* Cancel link */
+      .fs-cancel {
+        display: block;
+        width: 100%;
+        margin-top: 14px;
+        padding: 8px 0;
+        background: transparent;
+        border: none;
+        color: var(--brand-muted-foreground);
+        font-family: inherit;
+        font-size: 15px;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .fs-cancel:active { color: var(--brand-foreground); }
+
+      /* Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        .fs-backdrop, .fs-sheet, .fs-duration-card, .fs-start {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+</body>
+</html>

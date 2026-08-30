@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专注中</title>
+    <style id="theme-vars">
+/* PayMe 专注 — Design Tokens
+   Primary hue: warm gold (earnings / coin theme)
+   Focus screen: deep dark immersive background
+   Task list: clean light iOS surface
+*/
+
+:root {
+  /* === Brand Primary (Gold) === */
+  --brand-gold: #D4A017;
+  --brand-gold-light: #E8C25A;
+  --brand-gold-dark: #B8860B;
+  --brand-gold-soft: #F5E6C8;
+
+  /* === Light Mode — Task List === */
+  --brand-background: #F7F6F2;
+  --brand-foreground: #1A1A1F;
+  --brand-card: #FFFFFF;
+  --brand-card-foreground: #1A1A1F;
+  --brand-popover: #FFFFFF;
+  --brand-popover-foreground: #1A1A1F;
+  --brand-primary: #D4A017;
+  --brand-primary-foreground: #1A1A1F;
+  --brand-muted: #F0EDE5;
+  --brand-muted-foreground: #8A8A8E;
+  --brand-border: #E5E2DA;
+  --brand-input: #F0EDE5;
+  --brand-ring: #D4A017;
+
+  /* === Dark Mode — Focus Screen === */
+  --brand-dark-bg: #0B0B0F;
+  --brand-dark-surface: #14141A;
+  --brand-dark-surface-2: #1E1E26;
+  --brand-dark-ink: #FFFFFF;
+  --brand-dark-ink-2: rgba(255,255,255,0.65);
+  --brand-dark-ink-3: rgba(255,255,255,0.40);
+  --brand-dark-border: rgba(255,255,255,0.08);
+  --brand-dark-gold: #F0C75E;
+  --brand-dark-gold-soft: rgba(240,199,94,0.12);
+
+  /* === State Colors === */
+  --state-success: #34A853;
+  --state-warning: #F5A623;
+  --state-error: #EA4335;
+  --state-info: #4A90D9;
+
+  /* === Radius Scale === */
+  --brand-radius-sm: 8px;
+  --brand-radius-md: 12px;
+  --brand-radius-lg: 16px;
+  --brand-radius-xl: 16px;
+  --brand-radius-pill: 999px;
+
+  /* === Typography === */
+  --brand-font-sans: -apple-system, "SF Pro Display", "SF Pro Text", "PingFang SC", "Noto Sans SC", "Helvetica Neue", system-ui, sans-serif;
+  --brand-font-mono: "SF Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+
+  /* === Spacing === */
+  --brand-space-1: 4px;
+  --brand-space-2: 8px;
+  --brand-space-3: 12px;
+  --brand-space-4: 16px;
+  --brand-space-5: 24px;
+  --brand-space-6: 32px;
+  --brand-space-7: 48px;
+
+  /* === Shadows === */
+  --brand-shadow-1: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03);
+  --brand-shadow-2: 0 8px 24px -8px rgba(15,23,42,0.05);
+  --brand-shadow-3: 0 24px 60px -20px rgba(15,23,42,0.05);
+  --brand-shadow-gold: 0 4px 20px -4px rgba(212,160,23,0.05);
+  --brand-shadow-modal: 0 8px 24px -8px rgba(15,23,42,0.12);
+  --brand-shadow-overlay: 0 24px 60px -20px rgba(15,23,42,0.25);
+  --brand-shadow-gold-glow: 0 4px 20px -4px rgba(212,160,23,0.30);
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--brand-background);
+    --color-foreground: var(--brand-foreground);
+    --color-card: var(--brand-card);
+    --color-card-foreground: var(--brand-card-foreground);
+    --color-popover: var(--brand-popover);
+    --color-popover-foreground: var(--brand-popover-foreground);
+    --color-primary: var(--brand-primary);
+    --color-primary-foreground: var(--brand-primary-foreground);
+    --color-muted: var(--brand-muted);
+    --color-muted-foreground: var(--brand-muted-foreground);
+    --color-border: var(--brand-border);
+    --color-input: var(--brand-input);
+    --color-ring: var(--brand-ring);
+    --radius-sm: var(--brand-radius-sm);
+    --radius-md: var(--brand-radius-md);
+    --radius-lg: var(--brand-radius-lg);
+    --radius-xl: var(--brand-radius-xl);
+  }
+  @layer base {
+    body { background: var(--brand-background); color: var(--brand-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--brand-background); }
+      .text-background { color: var(--brand-background); }
+      .border-background { border-color: var(--brand-background); }
+      .ring-background { --tw-ring-color: var(--brand-background); }
+      .bg-foreground { background-color: var(--brand-foreground); }
+      .text-foreground { color: var(--brand-foreground); }
+      .border-foreground { border-color: var(--brand-foreground); }
+      .ring-foreground { --tw-ring-color: var(--brand-foreground); }
+      .bg-card { background-color: var(--brand-card); }
+      .text-card { color: var(--brand-card); }
+      .border-card { border-color: var(--brand-card); }
+      .ring-card { --tw-ring-color: var(--brand-card); }
+      .bg-card-foreground { background-color: var(--brand-card-foreground); }
+      .text-card-foreground { color: var(--brand-card-foreground); }
+      .border-card-foreground { border-color: var(--brand-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--brand-card-foreground); }
+      .bg-popover { background-color: var(--brand-popover); }
+      .text-popover { color: var(--brand-popover); }
+      .border-popover { border-color: var(--brand-popover); }
+      .ring-popover { --tw-ring-color: var(--brand-popover); }
+      .bg-popover-foreground { background-color: var(--brand-popover-foreground); }
+      .text-popover-foreground { color: var(--brand-popover-foreground); }
+      .border-popover-foreground { border-color: var(--brand-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--brand-popover-foreground); }
+      .bg-primary { background-color: var(--brand-primary); }
+      .text-primary { color: var(--brand-primary); }
+      .border-primary { border-color: var(--brand-primary); }
+      .ring-primary { --tw-ring-color: var(--brand-primary); }
+      .bg-primary-foreground { background-color: var(--brand-primary-foreground); }
+      .text-primary-foreground { color: var(--brand-primary-foreground); }
+      .border-primary-foreground { border-color: var(--brand-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--brand-primary-foreground); }
+      .bg-muted { background-color: var(--brand-muted); }
+      .text-muted { color: var(--brand-muted); }
+      .border-muted { border-color: var(--brand-muted); }
+      .ring-muted { --tw-ring-color: var(--brand-muted); }
+      .bg-muted-foreground { background-color: var(--brand-muted-foreground); }
+      .text-muted-foreground { color: var(--brand-muted-foreground); }
+      .border-muted-foreground { border-color: var(--brand-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--brand-muted-foreground); }
+      .bg-border { background-color: var(--brand-border); }
+      .text-border { color: var(--brand-border); }
+      .border-border { border-color: var(--brand-border); }
+      .ring-border { --tw-ring-color: var(--brand-border); }
+      .bg-input { background-color: var(--brand-input); }
+      .text-input { color: var(--brand-input); }
+      .border-input { border-color: var(--brand-input); }
+      .ring-input { --tw-ring-color: var(--brand-input); }
+      .bg-ring { background-color: var(--brand-ring); }
+      .text-ring { color: var(--brand-ring); }
+      .border-ring { border-color: var(--brand-ring); }
+      .ring-ring { --tw-ring-color: var(--brand-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <style id="critical-layout">
+      /* === Root frame: deep dark immersive canvas === */
+      html, body { height: 100%; }
+      body {
+        background-color: var(--brand-dark-bg);
+        background-image: radial-gradient(circle at 50% 20%, rgba(240,199,94,0.04) 0%, transparent 60%);
+        background-attachment: fixed;
+        color: var(--brand-dark-ink);
+        font-family: var(--brand-font-sans);
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        position: relative;
+        flex: 1;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* === Top bar === */
+      .top-bar {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 0;
+        z-index: 20;
+      }
+      .close-btn {
+        width: 32px; height: 32px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: transparent; border: none; cursor: pointer;
+        color: rgba(255,255,255,0.40);
+        transition: color .2s ease;
+      }
+      .close-btn:hover { color: rgba(255,255,255,0.65); }
+      .close-btn:active { transform: scale(0.94); }
+
+      /* === Skin toggle button === */
+      .skin-toggle-btn {
+        width: 32px; height: 32px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: transparent; border: none; cursor: pointer;
+        color: rgba(255,255,255,0.40);
+        transition: color .2s ease, transform .15s ease;
+        border-radius: 50%;
+      }
+      .skin-toggle-btn:hover { color: rgba(255,255,255,0.65); }
+      .skin-toggle-btn:active { transform: scale(0.92); }
+      .skin-toggle-btn svg { display: inline-block; }
+        /* === Focus content (wallet centered at screen middle) === */
+      .focus-content {
+        flex: 1;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* === Task name (above wallet) === */
+      .task-name {
+        position: absolute;
+        top: calc(50vh - 110px); left: 50%;
+        transform: translateX(-50%);
+        font-size: 17px; font-weight: 600;
+        color: var(--brand-dark-ink-2);
+        text-align: center;
+        z-index: 11;
+      }
+
+      /* === Wallet icon (exactly at screen center) === */
+      .wallet-icon {
+        position: absolute;
+        top: 50vh; left: 50vw;
+        display: flex; align-items: center; justify-content: center;
+        animation: wallet-breathe 2s ease-in-out infinite;
+        filter: drop-shadow(0 0 24px rgba(240,199,94,0.30));
+      }
+      @keyframes wallet-breathe {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.06); }
+      }
+
+      /* === Earnings (below wallet) === */
+      .earnings {
+        position: absolute;
+        top: calc(50vh + 85px); left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .earn-amount {
+        display: inline-flex; align-items: center;
+        justify-content: center; gap: 6px;
+      }
+      .earn-num {
+        font-size: 48px; font-weight: 700;
+        color: var(--brand-dark-gold);
+        font-variant-numeric: tabular-nums;
+        display: inline-block;
+        transform-origin: center;
+      }
+      .earnings-bump { animation: earn-bump 200ms ease-out; }
+      @keyframes earn-bump {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      /* === Timer (below earnings) === */
+      .timer-display {
+        position: absolute;
+        top: calc(50vh + 155px); left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+      .timer-display .time {
+        font-size: 28px; font-weight: 300;
+        color: var(--brand-dark-ink-3);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em; line-height: 1;
+      }
+
+      /* === Coin flow layer === */
+      .coin-layer {
+        position: absolute; inset: 0;
+        pointer-events: none; overflow: hidden;
+        z-index: 5;
+        perspective: 600px;
+      }
+      .coin {
+        position: absolute;
+        top: var(--start-y, -32px);
+        left: var(--start-x);
+        animation: coin-flow var(--duration) linear var(--delay) infinite;
+        will-change: transform, opacity;
+        transform-style: preserve-3d;
+      }
+      .coin svg { display: block; }
+      @keyframes coin-flow {
+        0% {
+          transform: translate3d(0, 0, 0) rotateY(0deg) scale(0.5);
+          opacity: 0;
+        }
+        5% {
+          opacity: 0.9;
+        }
+        15% {
+          transform: translate3d(calc((50vw - 15px - var(--start-x)) * 0.08), calc(var(--target-y) * 0.10), 40px) rotateY(108deg) scale(0.85);
+          opacity: 0.95;
+        }
+        35% {
+          transform: translate3d(calc((50vw - 15px - var(--start-x)) * 0.28), calc(var(--target-y) * 0.32), 50px) rotateY(252deg) scale(1);
+          opacity: 0.95;
+        }
+        55% {
+          transform: translate3d(calc((50vw - 15px - var(--start-x)) * 0.55), calc(var(--target-y) * 0.58), 30px) rotateY(396deg) scale(1);
+          opacity: 0.9;
+        }
+        75% {
+          transform: translate3d(calc((50vw - 15px - var(--start-x)) * 0.80), calc(var(--target-y) * 0.82), 12px) rotateY(540deg) scale(0.75);
+          opacity: 0.65;
+        }
+        90% {
+          transform: translate3d(calc((50vw - 15px - var(--start-x)) * 0.95), calc(var(--target-y) * 0.96), 4px) rotateY(648deg) scale(0.4);
+          opacity: 0.3;
+        }
+        100% {
+          transform: translate3d(calc(50vw - 15px - var(--start-x)), calc(var(--target-y) + 17px), 0) rotateY(720deg) scale(0.15);
+          opacity: 0;
+        }
+      }
+
+      /* === Banknote rain (skin: banknote) === */
+      .coin-layer[data-skin="banknote"] .coin { display: none; }
+      .coin-layer[data-skin="banknote"] .note { display: block; }
+      .note {
+        position: absolute;
+        top: -40px;
+        left: var(--start-x);
+        display: none;
+        animation: note-flow var(--duration) linear var(--delay) infinite;
+        will-change: transform, opacity;
+        transform-style: preserve-3d;
+      }
+      .note svg { display: block; }
+      @keyframes note-flow {
+        0% {
+          transform: translate3d(0, 0, 0) rotateY(0deg) rotateZ(0deg) scale(0.5);
+          opacity: 0;
+        }
+        5% {
+          opacity: 0.9;
+        }
+        15% {
+          transform: translate3d(calc((50vw - 30px - var(--start-x)) * 0.08), calc(var(--target-y) * 0.10), 40px) rotateY(72deg) rotateZ(-4deg) scale(0.85);
+          opacity: 0.95;
+        }
+        35% {
+          transform: translate3d(calc((50vw - 30px - var(--start-x)) * 0.28), calc(var(--target-y) * 0.32), 50px) rotateY(144deg) rotateZ(5deg) scale(1);
+          opacity: 0.95;
+        }
+        55% {
+          transform: translate3d(calc((50vw - 30px - var(--start-x)) * 0.55), calc(var(--target-y) * 0.58), 30px) rotateY(216deg) rotateZ(-3deg) scale(1);
+          opacity: 0.9;
+        }
+        75% {
+          transform: translate3d(calc((50vw - 30px - var(--start-x)) * 0.80), calc(var(--target-y) * 0.82), 12px) rotateY(288deg) rotateZ(4deg) scale(0.75);
+          opacity: 0.65;
+        }
+        90% {
+          transform: translate3d(calc((50vw - 30px - var(--start-x)) * 0.95), calc(var(--target-y) * 0.96), 4px) rotateY(342deg) rotateZ(-2deg) scale(0.4);
+          opacity: 0.3;
+        }
+        100% {
+          transform: translate3d(calc(50vw - 30px - var(--start-x)), calc(var(--target-y) + 23px), 0) rotateY(360deg) rotateZ(0deg) scale(0.15);
+          opacity: 0;
+        }
+      }
+
+      /* === End button === */
+      .end-wrap {
+        position: relative; z-index: 20;
+        display: flex; justify-content: center;
+        padding: 0 0 calc(env(safe-area-inset-bottom, 0px) + 32px);
+      }
+      .end-btn {
+        font-size: 15px; font-weight: 500;
+        color: var(--brand-dark-ink-2);
+        background: rgba(255,255,255,0.08);
+        border: 1px solid var(--brand-dark-border);
+        border-radius: var(--brand-radius-pill);
+        padding: 12px 32px;
+        cursor: pointer;
+        transition: background .2s ease, color .2s ease, transform .15s ease;
+      }
+      .end-btn:hover { background: rgba(255,255,255,0.12); color: var(--brand-dark-ink); }
+      .end-btn:active { transform: scale(0.97); }
+
+      /* === Reduced motion === */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+        .coin { display: none; }
+        .note { display: none; }
+      }
+    </style>
+    <main>
+      <!-- Top bar: close + skin toggle -->
+      <div class="top-bar">
+        <button id="focus-end" data-dom-id="focus-end" class="close-btn" type="button" aria-label="结束专注">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+        <button id="skin-toggle" class="skin-toggle-btn" type="button" aria-label="切换皮肤">
+          <svg viewBox="0 0 16 16" width="16" height="16" class="skin-coin-icon"><use href="#skin-coin-mini"/></svg>
+          <svg viewBox="0 0 24 16" width="20" height="14" class="skin-note-icon" style="display:none"><use href="#skin-note-mini"/></svg>
+        </button>
+      </div>
+
+      <!-- Coin rain layer (behind content) -->
+      <div class="coin-layer" id="coin-layer" aria-hidden="true">
+        <!-- SVG symbol defs -->
+        <svg width="0" height="0" style="position:absolute" xmlns="http://www.w3.org/2000/svg">
+          <symbol id="coin-icon" viewBox="0 0 32 32">
+            <!-- Outer rim -->
+            <circle cx="16" cy="16" r="15" fill="#F0C75E"/>
+            <circle cx="16" cy="16" r="15" fill="none" stroke="#D4A017" stroke-width="1.4"/>
+            <!-- Inner ring for depth -->
+            <circle cx="16" cy="16" r="12" fill="none" stroke="#B8860B" stroke-width="0.6" stroke-opacity="0.35"/>
+            <!-- Side highlight -->
+            <ellipse cx="11" cy="10" rx="4" ry="2.6" fill="rgba(255,255,255,0.38)" transform="rotate(-35 11 10)"/>
+            <!-- ¥ stroke layer -->
+            <text x="16" y="22.5" text-anchor="middle" font-size="17" font-weight="800" fill="none" stroke="#8B6914" stroke-width="2.5" stroke-linejoin="round" font-family="system-ui, -apple-system, sans-serif">¥</text>
+            <!-- ¥ fill layer -->
+            <text x="16" y="22.5" text-anchor="middle" font-size="17" font-weight="800" fill="#5C4308" font-family="system-ui, -apple-system, sans-serif">¥</text>
+          </symbol>
+          <symbol id="note-icon" viewBox="0 0 40 24">
+            <!-- Banknote body -->
+            <rect x="0.5" y="0.5" width="39" height="23" rx="3" fill="#5BA670"/>
+            <rect x="0.5" y="0.5" width="39" height="23" rx="3" fill="none" stroke="#3A7D50" stroke-width="1"/>
+            <!-- Inner border -->
+            <rect x="3" y="3" width="34" height="18" rx="2" fill="none" stroke="#3A7D50" stroke-width="0.5" stroke-dasharray="2 1.5" stroke-opacity="0.5"/>
+            <!-- Central circle with ¥ -->
+            <circle cx="20" cy="12" r="7" fill="rgba(255,255,255,0.18)" stroke="#2E6B3A" stroke-width="0.6"/>
+            <text x="20" y="15.5" text-anchor="middle" font-size="9" font-weight="800" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif">¥</text>
+            <!-- Corner decorations -->
+            <circle cx="6" cy="6" r="1.5" fill="#3A7D50" fill-opacity="0.4"/>
+            <circle cx="34" cy="18" r="1.5" fill="#3A7D50" fill-opacity="0.4"/>
+          </symbol>
+          <!-- Skin toggle mini icons -->
+          <symbol id="skin-coin-mini" viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="7" fill="rgba(240,199,94,0.2)" stroke="#F0C75E" stroke-width="1"/>
+            <text x="8" y="11" text-anchor="middle" font-size="8" font-weight="700" fill="#F0C75E" font-family="system-ui, sans-serif">¥</text>
+          </symbol>
+          <symbol id="skin-note-mini" viewBox="0 0 24 16">
+            <rect x="0.5" y="0.5" width="23" height="15" rx="2" fill="rgba(91,166,112,0.2)" stroke="#5BA670" stroke-width="0.8"/>
+            <circle cx="12" cy="8" r="3" fill="none" stroke="#5BA670" stroke-width="0.5"/>
+            <text x="12" y="10.5" text-anchor="middle" font-size="5" font-weight="700" fill="#5BA670" font-family="system-ui, sans-serif">¥</text>
+          </symbol>
+        </svg>
+        <!-- Coin 1 -->
+        <span class="coin" style="--start-x:5vw; --target-y:50vh; --delay:0s; --duration:3.2s;"><svg viewBox="0 0 32 32" width="30" height="30"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 2 -->
+        <span class="coin" style="--start-x:12vw; --target-y:50vh; --delay:0.35s; --duration:3.6s;"><svg viewBox="0 0 32 32" width="28" height="28"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 3 -->
+        <span class="coin" style="--start-x:20vw; --target-y:50vh; --delay:0.7s; --duration:3.0s;"><svg viewBox="0 0 32 32" width="32" height="32"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 4 -->
+        <span class="coin" style="--start-x:28vw; --target-y:50vh; --delay:1.05s; --duration:3.9s;"><svg viewBox="0 0 32 32" width="29" height="29"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 5 -->
+        <span class="coin" style="--start-x:35vw; --target-y:50vh; --delay:1.4s; --duration:3.3s;"><svg viewBox="0 0 32 32" width="30" height="30"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 6 -->
+        <span class="coin" style="--start-x:45vw; --target-y:50vh; --delay:1.75s; --duration:4.2s;"><svg viewBox="0 0 32 32" width="28" height="28"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 7 -->
+        <span class="coin" style="--start-x:52vw; --target-y:50vh; --delay:2.1s; --duration:3.1s;"><svg viewBox="0 0 32 32" width="31" height="31"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 8 -->
+        <span class="coin" style="--start-x:60vw; --target-y:50vh; --delay:2.45s; --duration:3.7s;"><svg viewBox="0 0 32 32" width="30" height="30"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 9 -->
+        <span class="coin" style="--start-x:68vw; --target-y:50vh; --delay:2.8s; --duration:3.4s;"><svg viewBox="0 0 32 32" width="29" height="29"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 10 -->
+        <span class="coin" style="--start-x:75vw; --target-y:50vh; --delay:3.15s; --duration:4.0s;"><svg viewBox="0 0 32 32" width="32" height="32"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 11 -->
+        <span class="coin" style="--start-x:82vw; --target-y:50vh; --delay:3.5s; --duration:3.2s;"><svg viewBox="0 0 32 32" width="28" height="28"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 12 -->
+        <span class="coin" style="--start-x:90vw; --target-y:50vh; --delay:3.85s; --duration:3.8s;"><svg viewBox="0 0 32 32" width="30" height="30"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 13 -->
+        <span class="coin" style="--start-x:95vw; --target-y:50vh; --delay:4.2s; --duration:3.5s;"><svg viewBox="0 0 32 32" width="31" height="31"><use href="#coin-icon"/></svg></span>
+        <!-- Coin 14 -->
+        <span class="coin" style="--start-x:18vw; --target-y:50vh; --delay:4.55s; --duration:4.3s;"><svg viewBox="0 0 32 32" width="29" height="29"><use href="#coin-icon"/></svg></span>
+
+        <!-- Banknotes (钞票) -->
+        <span class="note" style="--start-x:5vw; --target-y:50vh; --delay:0s; --duration:3.5s;"><svg viewBox="0 0 40 24" width="58" height="35"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:14vw; --target-y:50vh; --delay:0.4s; --duration:4.0s;"><svg viewBox="0 0 40 24" width="55" height="33"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:24vw; --target-y:50vh; --delay:0.8s; --duration:3.3s;"><svg viewBox="0 0 40 24" width="62" height="37"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:33vw; --target-y:50vh; --delay:1.2s; --duration:3.8s;"><svg viewBox="0 0 40 24" width="56" height="34"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:42vw; --target-y:50vh; --delay:1.6s; --duration:3.6s;"><svg viewBox="0 0 40 24" width="58" height="35"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:52vw; --target-y:50vh; --delay:2.0s; --duration:4.2s;"><svg viewBox="0 0 40 24" width="55" height="33"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:60vw; --target-y:50vh; --delay:2.4s; --duration:3.4s;"><svg viewBox="0 0 40 24" width="60" height="36"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:68vw; --target-y:50vh; --delay:2.8s; --duration:3.9s;"><svg viewBox="0 0 40 24" width="56" height="34"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:76vw; --target-y:50vh; --delay:3.2s; --duration:3.7s;"><svg viewBox="0 0 40 24" width="62" height="37"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:85vw; --target-y:50vh; --delay:3.6s; --duration:3.5s;"><svg viewBox="0 0 40 24" width="55" height="33"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:92vw; --target-y:50vh; --delay:4.0s; --duration:4.1s;"><svg viewBox="0 0 40 24" width="58" height="35"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:20vw; --target-y:50vh; --delay:4.4s; --duration:3.8s;"><svg viewBox="0 0 40 24" width="56" height="34"><use href="#note-icon"/></svg></span>
+        <span class="note" style="--start-x:48vw; --target-y:50vh; --delay:4.8s; --duration:3.6s;"><svg viewBox="0 0 40 24" width="60" height="36"><use href="#note-icon"/></svg></span>
+      </div>
+
+      <!-- Focus content (wallet centered at screen middle) -->
+      <div class="focus-content">
+        <!-- Task name (top area) -->
+        <div class="task-name">深度阅读</div>
+
+        <!-- Wallet icon (screen center) -->
+        <div class="wallet-icon" aria-label="钱包">
+          <svg viewBox="0 0 120 100" width="170" height="142" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="w-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4"/>
+              </filter>
+            </defs>
+            <!-- Glow layer -->
+            <g filter="url(#w-glow)" opacity="0.35">
+              <rect x="15" y="30" width="90" height="55" rx="12" fill="none" stroke="#F0C75E" stroke-width="2.5"/>
+              <path d="M15 40 C15 12, 105 12, 105 40" fill="none" stroke="#F0C75E" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <!-- Wallet body -->
+            <rect x="15" y="30" width="90" height="55" rx="12" fill="rgba(240,199,94,0.05)" stroke="#F0C75E" stroke-width="2.5"/>
+            <!-- Flap -->
+            <path d="M15 40 C15 12, 105 12, 105 40" fill="rgba(240,199,94,0.06)" stroke="#F0C75E" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Stitching details -->
+            <rect x="24" y="44" width="72" height="32" rx="8" fill="none" stroke="#F0C75E" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="4 3"/>
+            <!-- Coin emblem -->
+            <circle cx="60" cy="60" r="10" fill="rgba(240,199,94,0.10)" stroke="#F0C75E" stroke-width="1.5" stroke-opacity="0.5"/>
+            <text x="60" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#F0C75E" fill-opacity="0.65" font-family="system-ui, sans-serif">¥</text>
+          </svg>
+        </div>
+
+        <!-- Earnings (below wallet) -->
+        <div class="earnings">
+          <div class="earn-amount">
+            <span class="earn-num" id="focus-earnings">¥0.00</span>
+          </div>
+        </div>
+
+        <!-- Timer (below earnings) -->
+        <div class="timer-display" id="section-focus-timer">
+          <div class="time" id="focus-time">12:30</div>
+        </div>
+      </div>
+
+      <!-- End focus button -->
+      <div class="end-wrap">
+        <button class="end-btn" type="button">结束专注</button>
+      </div>
+    </main>
+    <script>
+      (function () {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var timeEl = document.getElementById('focus-time');
+        var earnEl = document.getElementById('focus-earnings');
+
+        function fmtTime(s) {
+          var m = Math.floor(s / 60), sec = s % 60;
+          return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+        function fmt(n) { return n.toFixed(2); }
+
+        var elapsed = 12 * 60 + 30; // 12:30
+        if (timeEl) timeEl.textContent = fmtTime(elapsed);
+
+        if (reduce) {
+          if (earnEl) earnEl.textContent = '¥' + fmt(3.00);
+          return;
+        }
+
+        // Timer: +1s
+        setInterval(function () {
+          elapsed += 1;
+          if (timeEl) timeEl.textContent = fmtTime(elapsed);
+        }, 1000);
+
+        // Earnings: count up to ¥3.00 over ~5s, then slow ongoing
+        var earnings = 0;
+        function bump() {
+          if (!earnEl) return;
+          earnEl.classList.remove('earnings-bump');
+          void earnEl.offsetWidth;
+          earnEl.classList.add('earnings-bump');
+        }
+        function setEarn(v) {
+          earnings = v;
+          earnEl.textContent = '¥' + fmt(v);
+          bump();
+        }
+
+        var step = 0.20, target = 3.00;
+        var fast = setInterval(function () {
+          var next = Math.min(earnings + step, target);
+          setEarn(next);
+          if (next >= target) {
+            clearInterval(fast);
+            setInterval(function () { setEarn(earnings + 0.01); }, 4000);
+          }
+        }, 333);
+      })();
+    </script>
+    <script>lucide.createIcons();</script>
+    <script>
+      (function () {
+        var skinBtn = document.getElementById('skin-toggle');
+        var layer = document.getElementById('coin-layer');
+        var coinMini = document.querySelector('.skin-coin-icon');
+        var noteMini = document.querySelector('.skin-note-icon');
+        var currentSkin = 'coin';
+
+        function setSkin(skin) {
+          currentSkin = skin;
+          layer.setAttribute('data-skin', skin);
+          if (skin === 'banknote') {
+            coinMini.style.display = 'none';
+            noteMini.style.display = 'inline-block';
+            skinBtn.style.color = 'rgba(91,166,112,0.70)';
+          } else {
+            coinMini.style.display = 'inline-block';
+            noteMini.style.display = 'none';
+            skinBtn.style.color = 'rgba(240,199,94,0.70)';
+          }
+        }
+
+        skinBtn.style.color = 'rgba(240,199,94,0.70)';
+
+        skinBtn.addEventListener('click', function () {
+          setSkin(currentSkin === 'coin' ? 'banknote' : 'coin');
+        });
+      })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFBE6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF4C2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE066;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#F5A623;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4890A;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <rect width="100" height="100" fill="url(#bgGrad)"/>
+  <text x="50" y="76" font-family="'Arial Black', Impact, sans-serif" font-size="80" font-weight="900" fill="url(#goldGrad)" text-anchor="middle" filter="url(#shadow)">$</text>
+</svg>
