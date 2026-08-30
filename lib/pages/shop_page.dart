@@ -288,89 +288,116 @@ class _ShopCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onEdit,
-      child: Container(
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-      decoration: BoxDecoration(
-        color: p.card,
-        borderRadius: BorderRadius.circular(AppTokens.radiusLg),
-        border: Border.all(color: owned ? p.goldSoft : p.border),
-        boxShadow: AppShadows.shadow1,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          // emoji icon
-          Center(
-            child: Container(
-              width: 56,
-              height: 56,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: p.goldSoft,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                item.emoji,
-                style: const TextStyle(fontSize: 28),
-              ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+            decoration: BoxDecoration(
+              color: p.card,
+              borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+              border: Border.all(color: owned ? p.goldSoft : p.border),
+              boxShadow: AppShadows.shadow1,
             ),
-          ),
-          const SizedBox(height: 10),
-          Center(
-            child: Text(
-              item.nameKey != null ? context.t(item.nameKey!) : item.name,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: p.cardForeground,
-                height: 1.2,
-              ),
-            ),
-          ),
-          const SizedBox(height: 3),
-          Center(
-            child: Text(
-              item.descKey != null ? context.t(item.descKey!) : item.description,
-              style: TextStyle(
-                fontSize: 11,
-                color: p.mutedForeground,
-                height: 1.3,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const Spacer(),
-          const SizedBox(height: 8),
-          // price + button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CoinIcon(size: 14),
-                  const SizedBox(width: 3),
-                  Text(
-                    Format.num2(item.price),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: p.gold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // emoji icon
+                Center(
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: p.goldSoft,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      item.emoji,
+                      style: const TextStyle(fontSize: 28),
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    item.nameKey != null ? context.t(item.nameKey!) : item.name,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: p.cardForeground,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Center(
+                  child: Text(
+                    item.descKey != null ? context.t(item.descKey!) : item.description,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: p.mutedForeground,
+                      height: 1.3,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Spacer(),
+                const SizedBox(height: 8),
+                // price + button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CoinIcon(size: 14),
+                        const SizedBox(width: 3),
+                        Text(
+                          Format.num2(item.price),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: p.gold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 6),
+                    // Flexible + 省略号:避免"Need more"等英文标签溢出卡片
+                    Flexible(
+                      child: _BuyButton(
+                        p: p,
+                        owned: owned,
+                        affordable: affordable,
+                        onTap: onBuy,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // 编辑/删除入口:点击打开编辑面板(内含删除商品),让增删改清晰可见
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: onEdit,
+              child: Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: p.input,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.edit_outlined, size: 15, color: p.mutedForeground),
               ),
-              _BuyButton(
-                p: p,
-                owned: owned,
-                affordable: affordable,
-                onTap: onBuy,
-              ),
-            ],
+            ),
           ),
         ],
-      ),
       ),
     );
   }
@@ -404,6 +431,8 @@ class _BuyButton extends StatelessWidget {
         ),
         child: Text(
           owned ? context.t('shop.owned') : (affordable ? context.t('shop.redeem') : context.t('shop.need.more')),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
