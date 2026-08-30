@@ -1,0 +1,25 @@
+workflows:
+  flutter-android-apk:  # 工作流名称，可自定义
+    name: Flutter Android APK
+    max_build_duration: 60
+    instance_type: mac_mini_m2  # 构建机器类型，Android也可以在Linux或Windows机器上构建[citation:1]
+    environment:
+      flutter: stable  # 指定Flutter版本或通道，例如stable, beta, master[citation:1]
+      groups:
+        # 这里可以引用你在Codemagic UI中设置的环境变量组（例如，存放密钥库信息）
+        # - android_keystore
+    scripts:
+      - name: 设置 Flutter SDK 路径
+        script: | 
+          echo "flutter.sdk=$FLUTTER_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: 获取 Flutter 依赖
+        script: | 
+          flutter pub get
+      - name: 构建 Release APK
+        script: | 
+          # 构建Release模式的APK
+          # 如果想构建 App Bundle (.aab)，将命令换成 flutter build appbundle --release[citation:3][citation:5]
+          flutter build apk --debug 
+    artifacts:
+      # 指定构建产物路径，这样构建完成后就能在Codemagic上下载[citation:3]
+      - build/app/outputs/flutter-apk/*.apk 
