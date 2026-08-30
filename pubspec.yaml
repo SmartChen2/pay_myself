@@ -39,7 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   audioplayers: ^6.8.1
   # 本地文件选择(头像上传),支持 Windows 桌面
-  file_picker: ^8.1.0
+  file_picker: ^12.1.2
 
 dev_dependencies:
   flutter_test:
