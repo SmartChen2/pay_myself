@@ -335,12 +335,11 @@ class ProfilePage extends StatelessWidget {
 
   /// 选图上传头像(本地持久化)
   Future<void> _pickAvatar(BuildContext context, AppState state) async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-    if (result == null || result.files.isEmpty) return;
-    final srcPath = result.files.single.path;
+    // file_picker 12.x: 单文件选择使用 pickFile(),返回 PlatformFile?;
+    // 旧的 FilePicker.pickFiles()/FilePickerResult 已在 v12 中移除。
+    final file = await FilePicker.pickFile(type: FileType.image);
+    if (file == null) return;
+    final srcPath = file.path;
     if (srcPath == null) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
