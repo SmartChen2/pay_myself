@@ -9,6 +9,10 @@ import '../utils/storage.dart';
 import '../utils/format.dart';
 
 class AppState extends ChangeNotifier {
+  /// 默认专注时长列表（分钟），用户可在"我的"页增删改。
+  /// 保留旧版静态默认值，用于数据迁移。
+  static const List<int> _legacyFocusDurations = [40, 60, 90, 120];
+
   List<Task> _tasks = [
     const Task(id: 'task-relax', name: '放松工作', ratePerHour: 30, nameKey: 'task.default.relax.name'),
     const Task(id: 'task-reading', name: '深度阅读', ratePerHour: 20, nameKey: 'task.default.reading.name'),
@@ -32,6 +36,8 @@ class AppState extends ChangeNotifier {
   RainStyle _rainStyle = RainStyle.coin;
   /// 'auto' / 'zh' / 'en'；auto 时跟随系统语言
   String _localeOverride = 'auto';
+  /// 用户自定义专注时长列表（分钟），默认 4 档。
+  List<int> _focusDurations = List.unmodifiable(_legacyFocusDurations);
   int _seq = 100;
 
   // === 用户资料(本地持久化) ===
@@ -121,6 +127,14 @@ class AppState extends ChangeNotifier {
     }
     final loc = j['localeOverride'];
     if (loc is String) _localeOverride = loc;
+    final fds = j['focusDurations'];
+    if (fds is List && fds.isNotEmpty && fds.every((e) => e is int && e > 0)) {
+      final loaded = fds.cast<int>().toList()..sort();
+      _focusDurations = List.unmodifiable(loaded);
+    } else {
+      // 兼容旧版：只有档位没有列表时，回退到默认 4 档（升序）。
+      _focusDurations = List.unmodifiable(_legacyFocusDurations);
+    }
     final seq = j['seq'];
     if (seq is int) _seq = seq;
     final nick = j['nickname'];
@@ -161,6 +175,7 @@ class AppState extends ChangeNotifier {
       'coinRainDensity': _coinRainDensity,
       'rainStyle': _rainStyle.name,
       'localeOverride': _localeOverride,
+      'focusDurations': _focusDurations.toList(),
       'seq': _seq,
       'nickname': _nickname,
       'avatarPath': _avatarPath,
@@ -267,6 +282,27 @@ class AppState extends ChangeNotifier {
     Format.currentLang = effectiveLanguageCode;
     notifyListeners();
     _persist();
+  }
+
+  /// 用户自定义专注时长列表（分钟），至少保留一项。
+  List<int> get focusDurations => List.unmodifiable(_focusDurations);
+
+  /// 替换整个专注时长列表（会过滤掉非正整数、升序排序，并确保非空）。
+  void setFocusDurations(List<int> durations) {
+    final cleaned = durations.where((d) => d > 0).toList()..sort();
+    if (cleaned.isEmpty) return;
+    if (_listsEqual(_focusDurations, cleaned)) return;
+    _focusDurations = List.unmodifiable(cleaned);
+    notifyListeners();
+    _persist();
+  }
+
+  static bool _listsEqual(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   /// 设置昵称(去首尾空白后非空才更新)

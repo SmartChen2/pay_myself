@@ -118,12 +118,18 @@ class _CoinRainState extends State<CoinRain>
         ? _lerp(startX, targetX - halfW, phase)
         : startX;
     // converge: 飞向中心钱包；否则自顶向下贯穿全屏。
-    // py 起点拉远到 -halfH*5:确保淡入完成时金币仍在屏幕外,不会在左上角"卡住"。
+    // py 起点进一步拉远到 -halfH*10:确保淡入完成时金币仍完全在屏幕上方之外。
+    final startY = -halfH * 10;
     final py = widget.converge
-        ? _lerp(-halfH * 5, targetY + halfH, phase)
-        : _lerp(-halfH * 5, h + halfH * 5, phase);
+        ? _lerp(startY, targetY + halfH, phase)
+        : _lerp(startY, h + halfH * 5, phase);
     final scale = _scalePath(phase);
-    final opacity = widget.converge ? _opacityPath(phase) : _opacityPathFall(phase);
+    var opacity = widget.converge ? _opacityPath(phase) : _opacityPathFall(phase);
+    // 关键修复:金币整体还位于屏幕上方之外时强制透明。
+    // 因为淡入曲线在 phase~0.12 就已近不透明,而彼时 py 仍在屏幕顶部边缘,
+    // 一旦 AnimationController 因窗口失焦/降帧而暂停,就会在左上角"卡住"可见贴纸。
+    // 用 py 几何边界兜底,不依赖淡入曲线,彻底杜绝上方残留。
+    if (py + halfH < 0) opacity = 0.0;
     final rotY = 720 * phase * math.pi / 180;
 
     final matrix = Matrix4.identity()

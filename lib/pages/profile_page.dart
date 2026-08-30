@@ -207,6 +207,19 @@ class ProfilePage extends StatelessWidget {
                       ),
                       _SettingTile(
                         p: p,
+                        title: context.t('profile.focus.duration'),
+                        subtitle: context.t('profile.focus.duration.hint'),
+                        trailing: Text(
+                          _focusDurationsSummary(state.focusDurations),
+                          style: TextStyle(
+                            color: p.mutedForeground,
+                            fontSize: 15,
+                          ),
+                        ),
+                        onTap: () => _editFocusDuration(context, state),
+                      ),
+                      _SettingTile(
+                        p: p,
                         title: context.t('profile.rain.density'),
                         trailing: Text(
                           '${state.coinRainDensity}',
@@ -537,6 +550,31 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  /// 设置项右侧的简短汇总，如 "40m · 1h · 1.5h · 2h"
+  String _focusDurationsSummary(List<int> durations) {
+    if (durations.isEmpty) return '';
+    return durations.map((d) {
+      if (d == 90) return '1.5h';
+      if (d % 60 == 0) return '${d ~/ 60}h';
+      return '${d}m';
+    }).join(' · ');
+  }
+
+  /// 编辑专注时长：列表中可修改每个值、删除、新增。
+  void _editFocusDuration(BuildContext context, AppState state) async {
+    final result = await showModalBottomSheet<List<int>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (_) => _FocusDurationEditSheet(
+        durations: state.focusDurations,
+      ),
+    );
+    if (result == null) return;
+    state.setFocusDurations(result);
+  }
+
   /// 切换雨样式:金币雨 / 钞票雨
   void _editRainStyle(BuildContext context, AppState state) async {
     final p = AppPalette.of(context);
@@ -790,12 +828,14 @@ class _Section extends StatelessWidget {
 class _SettingTile extends StatelessWidget {
   final AppPalette p;
   final String title;
+  final String? subtitle;
   final Widget trailing;
   final VoidCallback? onTap;
   const _SettingTile({
     required this.p,
     required this.title,
     required this.trailing,
+    this.subtitle,
     this.onTap,
   });
 
@@ -809,13 +849,33 @@ class _SettingTile extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 15,
-                color: p.cardForeground,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: p.cardForeground,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: p.mutedForeground,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
             ),
+            const SizedBox(width: 12),
             trailing,
           ],
         ),
@@ -899,4 +959,276 @@ class _Chevron extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _Chevron old) => old.color != color;
+}
+
+/// 编辑专注时长的底部弹窗：可修改每个值、删除、新增，返回最终分钟列表。
+class _FocusDurationEditSheet extends StatefulWidget {
+  final List<int> durations;
+  const _FocusDurationEditSheet({required this.durations});
+
+  @override
+  State<_FocusDurationEditSheet> createState() => _FocusDurationEditSheetState();
+}
+
+class _FocusDurationEditSheetState extends State<_FocusDurationEditSheet> {
+  // 始终按时长升序保存,保证列表展示与最终结果一致。
+  late final List<int> _durations = (List<int>.from(widget.durations)..sort());
+
+  void _edit(int index) async {
+    final p = AppPalette.of(context);
+    final controller = TextEditingController(
+      text: '${_durations[index]}',
+    );
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: p.card,
+        title: Text(
+          ctx.t('task.edit.edit'),
+          style: TextStyle(color: p.foreground),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          style: TextStyle(color: p.foreground),
+          decoration: InputDecoration(
+            suffixText: _minuteUnit(ctx),
+            hintText: '${_durations[index]}',
+            hintStyle: TextStyle(color: p.mutedForeground),
+            filled: true,
+            fillColor: p.input,
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(AppTokens.radiusMd)),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('task.edit.cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: p.gold,
+              foregroundColor: p.foreground,
+            ),
+            child: Text(ctx.t('task.edit.save')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final v = int.tryParse(controller.text.trim());
+    if (v == null || v <= 0) return;
+    setState(() {
+      _durations[index] = v;
+      _durations.sort();
+    });
+  }
+
+  void _remove(int index) {
+    if (_durations.length <= 1) {
+      _showMessage(context.t('profile.focus.duration.empty'));
+      return;
+    }
+    setState(() => _durations.removeAt(index));
+  }
+
+  void _add() async {
+    final p = AppPalette.of(context);
+    final controller = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: p.card,
+        title: Text(
+          ctx.t('profile.focus.duration.add'),
+          style: TextStyle(color: p.foreground),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          style: TextStyle(color: p.foreground),
+          decoration: InputDecoration(
+            suffixText: _minuteUnit(ctx),
+            hintText: '30',
+            hintStyle: TextStyle(color: p.mutedForeground),
+            filled: true,
+            fillColor: p.input,
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(AppTokens.radiusMd)),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('task.edit.cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: p.gold,
+              foregroundColor: p.foreground,
+            ),
+            child: Text(ctx.t('profile.focus.duration.add')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final v = int.tryParse(controller.text.trim());
+    if (v == null || v <= 0) {
+      _showMessage(context.t('profile.focus.duration.invalid'));
+      return;
+    }
+    setState(() {
+      _durations.add(v);
+      _durations.sort();
+    });
+  }
+
+  /// 从 i18n "{0}分钟" / "{0}m" 中提取单位："分钟" / "m"
+  String _minuteUnit(BuildContext c) =>
+      c.t('duration.minute', ['0']).replaceAll('0', '').trim();
+
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
+    final padBottom = MediaQuery.viewPaddingOf(context).bottom;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+      ),
+      decoration: BoxDecoration(
+        color: p.card,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+        boxShadow: AppShadows.shadow2,
+      ),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, (padBottom + 20).clamp(20, 48)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: p.border,
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            context.t('profile.focus.duration.title'),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: p.foreground,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.t('profile.focus.duration.hint'),
+            style: TextStyle(fontSize: 12, color: p.mutedForeground),
+          ),
+          const SizedBox(height: 16),
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: _durations.length,
+              separatorBuilder: (_, __) => Divider(height: 1, color: p.border),
+              itemBuilder: (ctx, i) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    // 时长标签
+                    Expanded(
+                      child: Text(
+                        _formatMinutes(ctx, _durations[i]),
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: p.foreground,
+                        ),
+                      ),
+                    ),
+                    // 编辑按钮
+                    IconButton(
+                      icon: Icon(Icons.edit_rounded, size: 20, color: p.mutedForeground),
+                      tooltip: 'Edit',
+                      onPressed: () => _edit(i),
+                    ),
+                    // 删除按钮
+                    IconButton(
+                      icon: Icon(Icons.delete_outline_rounded, size: 20, color: p.mutedForeground),
+                      tooltip: 'Delete',
+                      onPressed: () => _remove(i),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _add,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(context.t('profile.focus.duration.add')),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: p.gold,
+                side: BorderSide(color: p.gold.withValues(alpha: 0.5)),
+                minimumSize: const Size.fromHeight(46),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => Navigator.of(context).pop(List<int>.from(_durations)),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                backgroundColor: p.gold,
+                foregroundColor: p.foreground,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTokens.radiusMd),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: Text(context.t('task.edit.save')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示用时长标签（分钟单位中英适配）
+  String _formatMinutes(BuildContext ctx, int mins) {
+    if (mins == 90) return ctx.t('duration.hour.half');
+    if (mins % 60 == 0) return ctx.t('duration.hour', ['${mins ~/ 60}']);
+    return ctx.t('duration.minute', ['$mins']);
+  }
 }

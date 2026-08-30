@@ -11,7 +11,7 @@ import 'icons.dart';
 Future<int?> showDurationSheet(
   BuildContext context, {
   required Task task,
-  int initial = 25,
+  required List<int> options,
 }) {
   return showModalBottomSheet<int>(
     context: context,
@@ -20,24 +20,24 @@ Future<int?> showDurationSheet(
     barrierColor: Colors.black.withOpacity(0.4),
     isDismissible: true,
     enableDrag: true,
-    builder: (_) => _DurationSheet(task: task, initial: initial),
+    builder: (_) => _DurationSheet(task: task, options: options),
   );
 }
 
 class _DurationSheet extends StatefulWidget {
   final Task task;
-  final int initial;
-  const _DurationSheet({required this.task, required this.initial});
+  final List<int> options;
+  const _DurationSheet({required this.task, required this.options});
 
   @override
   State<_DurationSheet> createState() => _DurationSheetState();
 }
 
 class _DurationSheetState extends State<_DurationSheet> {
-  late int _selected = widget.initial;
-  // 与设计稿一致:15 / 25 / 45 / 60 分钟,25 分钟为推荐项
-  static const _options = [15, 25, 45, 60];
-  static const _recommended = 25;
+  /// 默认选中第一档（用户在"我的"页排在最前的时长）。
+  late int _selected = widget.options.first;
+
+  List<int> get _options => widget.options;
 
   @override
   Widget build(BuildContext context) {
@@ -86,22 +86,20 @@ class _DurationSheetState extends State<_DurationSheet> {
               context.t('duration.title'),
               style: TextStyle(fontSize: 13, color: p.mutedForeground),
             ),
-            const SizedBox(height: 24),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.7,
+            const SizedBox(height: 20),
+            // 竖直列表：4 个选项，依次递增
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 for (final d in _options)
-                  _DurationCard(
-                    duration: d,
-                    reward: widget.task.rewardFor(d),
-                    recommended: d == _recommended,
-                    selected: d == _selected,
-                    onTap: () => setState(() => _selected = d),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _DurationRow(
+                      duration: d,
+                      reward: widget.task.rewardFor(d),
+                      selected: d == _selected,
+                      onTap: () => setState(() => _selected = d),
+                    ),
                   ),
               ],
             ),
@@ -176,16 +174,15 @@ class _DurationSheetState extends State<_DurationSheet> {
   }
 }
 
-class _DurationCard extends StatelessWidget {
+/// 竖直列表中的一行：左侧时长 + 收益，右侧选中标记
+class _DurationRow extends StatelessWidget {
   final int duration;
   final double reward;
-  final bool recommended;
   final bool selected;
   final VoidCallback onTap;
-  const _DurationCard({
+  const _DurationRow({
     required this.duration,
     required this.reward,
-    required this.recommended,
     required this.selected,
     required this.onTap,
   });
@@ -193,91 +190,78 @@ class _DurationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = AppPalette.of(context);
-    return Stack(
-      children: [
-        InkWell(
-          onTap: onTap,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppTokens.radiusLg),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: selected ? p.goldSoft : p.card,
+          border: Border.all(
+            color: selected ? p.gold : p.border,
+            width: 2,
+          ),
           borderRadius: BorderRadius.circular(AppTokens.radiusLg),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: selected ? p.goldSoft : p.card,
-              border: Border.all(
-                color: selected ? p.gold : p.border,
-                width: 2,
+          boxShadow: selected ? AppShadows.shadowGold : null,
+        ),
+        child: Row(
+          children: [
+            // 时长
+            Text(
+              _durLabel(context, duration),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: p.foreground,
+                height: 1.2,
               ),
-              borderRadius: BorderRadius.circular(AppTokens.radiusLg),
-              boxShadow: selected ? AppShadows.shadowGold : null,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(width: 12),
+            // 收益
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                CoinIcon(size: 16),
+                const SizedBox(width: 4),
                 Text(
-                  _durLabel(context, duration),
+                  '${Format.currencySymbol}${reward.toStringAsFixed(2)}',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: p.foreground,
+                    fontSize: 14,
+                    color: p.gold,
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CoinIcon(size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${Format.currencySymbol}${reward.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: p.gold,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
-          ),
-        ),
-        if (recommended)
-          Positioned(
-            top: -9,
-            right: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            const Spacer(),
+            // 选中标记
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
-                color: p.gold,
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: p.gold.withOpacity(0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                context.t('duration.recommend'),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: p.foreground,
-                  letterSpacing: 0.4,
+                shape: BoxShape.circle,
+                color: selected ? p.gold : Colors.transparent,
+                border: Border.all(
+                  color: selected ? p.gold : p.border,
+                  width: 2,
                 ),
               ),
+              child: selected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
+  /// 时长标签：40min / 1h / 1.5h / 2h（中英双语，适配任意分钟值）
   String _durLabel(BuildContext c, int d) {
-    if (d >= 60 && d % 60 == 0) {
-      return c.t('duration.hour', ['${d ~/ 60}']);
-    }
+    if (d == 90) return c.t('duration.hour.half');
+    if (d % 60 == 0) return c.t('duration.hour', ['${d ~/ 60}']);
     return c.t('duration.minute', ['$d']);
   }
 }

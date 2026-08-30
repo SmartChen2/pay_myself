@@ -8,6 +8,7 @@ import '../state/app_state_scope.dart';
 import '../utils/format.dart';
 import '../utils/sound.dart';
 import '../models/task.dart';
+import '../models/focus_session.dart';
 import '../i18n/strings.dart';
 import '../widgets/coin_rain.dart';
 import '../widgets/icons.dart';
@@ -230,6 +231,43 @@ class _FocusPageState extends State<FocusPage>
                       ),
                     ),
                   ],
+                  ),
+                ),
+              ),
+              // 右上角:金币雨 / 钞票雨 切换(与"我的"页面 rainStyle 一致)
+              Positioned(
+                top: 8,
+                right: 16,
+                child: GestureDetector(
+                  onTap: () => state.setRainStyle(
+                    state.rainStyle == RainStyle.coin
+                        ? RainStyle.banknote
+                        : RainStyle.coin,
+                  ),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTokens.darkBorder),
+                    ),
+                    child: Tooltip(
+                      // 提示点击后切换到的样式
+                      message: state.rainStyle == RainStyle.coin
+                          ? context.t('rain.banknote')
+                          : context.t('rain.coin'),
+                      child: state.rainStyle == RainStyle.coin
+                          ? const CoinIcon(
+                              size: 26,
+                              color: AppTokens.darkGold,
+                            )
+                          : const BanknoteIcon(
+                              width: 30,
+                              height: 20,
+                              color: AppTokens.darkGold,
+                            ),
+                    ),
                   ),
                 ),
               ),

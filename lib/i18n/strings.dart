@@ -96,6 +96,12 @@ class L10n {
     'profile.rain.style': '雨样式',
     'profile.language': '语言',
     'profile.sound': '音效',
+    'profile.focus.duration': '专注时长',
+    'profile.focus.duration.hint': '点击编辑默认专注时长',
+    'profile.focus.duration.title': '编辑专注时长',
+    'profile.focus.duration.add': '添加时长',
+    'profile.focus.duration.empty': '至少保留一个时长',
+    'profile.focus.duration.invalid': '请输入大于 0 的分钟数',
     'profile.version': '版本',
     'profile.feedback': '反馈',
     'profile.nickname.title': '设置昵称',
@@ -148,6 +154,7 @@ class L10n {
     'duration.recommend': '推荐',
     'duration.hour': '{0}小时',
     'duration.minute': '{0}分钟',
+    'duration.hour.half': '1.5小时',
 
     // === 任务编辑 ===
     'task.edit.new': '新建任务',
@@ -280,6 +287,12 @@ class L10n {
     'profile.rain.style': 'Rain style',
     'profile.language': 'Language',
     'profile.sound': 'Sound',
+    'profile.focus.duration': 'Focus duration',
+    'profile.focus.duration.hint': 'Tap to edit default focus durations',
+    'profile.focus.duration.title': 'Edit focus durations',
+    'profile.focus.duration.add': 'Add duration',
+    'profile.focus.duration.empty': 'Keep at least one duration',
+    'profile.focus.duration.invalid': 'Please enter minutes greater than 0',
     'profile.version': 'Version',
     'profile.feedback': 'Feedback',
     'profile.nickname.title': 'Set nickname',
@@ -332,6 +345,7 @@ class L10n {
     'duration.recommend': 'Recommended',
     'duration.hour': '{0}h',
     'duration.minute': '{0}m',
+    'duration.hour.half': '1.5h',
 
     // === Task edit ===
     'task.edit.new': 'New task',

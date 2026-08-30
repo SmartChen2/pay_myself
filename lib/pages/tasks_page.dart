@@ -73,7 +73,12 @@ class TasksPage extends StatelessWidget {
   }
 
   void _pickDuration(BuildContext context, Task task) async {
-    final mins = await showDurationSheet(context, task: task);
+    final state = AppStateScope.of(context);
+    final mins = await showDurationSheet(
+      context,
+      task: task,
+      options: state.focusDurations,
+    );
     if (mins == null || !context.mounted) return;
     Navigator.of(context).pushNamed('/focus', arguments: {
       'taskId': task.id,
